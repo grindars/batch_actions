@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = BatchActions::VERSION
   spec.authors       = ["Sergey Gridasov"]
   spec.email         = ["grindars@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{Batch action support for Rails.}
+  spec.summary       = %q{Batch action support for Rails.}
+  spec.homepage      = "https://github.com/grindars/batch_actions"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
