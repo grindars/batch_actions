@@ -2,7 +2,7 @@
 
 This gem adds generic support for batch actions to Rails controllers.
 
-Development sponsored by Evil Martians.
+Sponsored by [Evil Martians](http://evilmartians.com/).
 
 ## Installation
 
@@ -20,31 +20,31 @@ Or install it yourself as:
 
 ## Usage
 
-* Include BatchActions into controller.
-* Specify model using batch_model.
-* Specify actions using batch_action.
+```ruby
+class PostController < ApplicationController
+  include BatchActions
 
-For InheritedResources::Base-derived controllers, resource_class is used as model by default.
+  batch_model Post
 
-### Action definition
-    def batch_action(keyword, opts = {}, &block)
-    
-Supported options:
-* model: use specified model instead of controller-wide default
-* scope: use specified scope instead of default ->(model) { model.where(:id => params[:ids]) }
-* if: allow to execute action only if specified proc returns true, raise exception otherwise.
+  # Runs `model.publish` for every model from params[:ids]
+  batch_action :publish
 
-If block is not specified, default action is used: send keyword to each object in scope.
+  # Runs `model.destroy` for every model from params[:ids] or throws exception unless you can
+  batch_action :destroy, if: ->() { can? :destroy, Post }
 
-Set of allowed actions can be queried by calling batch_actions on controller instance.
+  # Runs block for every model from params[:ids]
+  batch_action :specific do |objects|
+    objects.each{|x| x.specific!}
+  end
 
-## Example
-    class PostController < ApplicationController
-      batch_model Post
-      batch_action :destroy, if: ->() { can? :destroy, Post } do |objects|
-        objects.each { |o| o.mark_as_deleted! }
-      end
-    end
+  # Runs `model.resurrect` for every model from returned relation
+  batch_action :resurrect, :scope => ->(ids) { Post.where(other_ids: ids) }
+end
+```
+
+Note that you can omit `batch_model` call if you use the [inherited_resources](https://github.com/josevalim/inherited_resources) gem. It grabs your model class from `resource_class`.
+
+There's one more important thing to know: set of active batch actions can be retrieved from controller by calling `batch_actions` on controller instance.
 
 ## Contributing
 
