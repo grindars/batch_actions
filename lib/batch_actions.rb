@@ -21,8 +21,8 @@ module BatchActions
     base.extend ClassMethods
 
     if defined?(InheritedResources::Base) &&
-       base.kind_of?(InheritedResources::Base)
-      batch_model resource_class
+       base < InheritedResources::Base
+      base.batch_model base.resource_class
     end
   end
 end
