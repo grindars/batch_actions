@@ -2,6 +2,9 @@
 
 This gem adds generic support for batch actions to Rails controllers.
 
+[![Travis CI](https://secure.travis-ci.org/grindars/batch_actions.png)](https://travis-ci.org/grindars/batch_actions)
+[![Code Climate](https://codeclimate.com/github/grindars/batch_actions.png)](https://codeclimate.com/github/grindars/batch_actions)
+
 Sponsored by [Evil Martians](http://evilmartians.com/).
 
 ## Installation
