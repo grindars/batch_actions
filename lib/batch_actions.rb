@@ -17,6 +17,14 @@ module BatchActions
     allowed
   end
 
+  def batch_action
+    action = params[:name]
+
+    raise "action is not allowed" unless batch_actions.include? action.to_sym
+
+    send(:"batch_#{action}")
+  end
+
   def self.included(base)
     base.extend ClassMethods
 

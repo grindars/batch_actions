@@ -121,4 +121,20 @@ describe BatchActions do
       end
     end.to_not raise_error
   end
+
+  it "implements batch_action" do
+    [ "test1", "test2" ].each do |action|
+      ctrl = mock_controller(
+        :ids => [ 1 ],
+        :name => action
+      ) do
+        batch_model TestModel
+        batch_action :test1
+        batch_action :test2
+      end
+
+      TestModel.any_instance.should_receive(action.to_sym).and_return(nil)
+      ctrl.batch_action
+    end
+  end
 end
