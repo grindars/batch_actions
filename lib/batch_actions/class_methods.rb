@@ -1,20 +1,20 @@
 module BatchActions
   module ClassMethods
     def batch_model(klass)
-      class_variable_set :@@batch_model, klass
+      instance_variable_set :@batch_model, klass
     end
 
     def batch_action(keyword, opts = {}, &block)
-      if !class_variable_defined? :@@batch_actions
-        class_variable_set :@@batch_actions, {}
+      if !instance_variable_defined? :@batch_actions
+        instance_variable_set :@batch_actions, {}
       end
 
-      actions = class_variable_get :@@batch_actions
+      actions = instance_variable_get :@batch_actions
 
       if opts.include? :model
         model = opts[:model]
-      elsif class_variable_defined? :@@batch_model
-        model = class_variable_get :@@batch_model
+      elsif instance_variable_defined? :@batch_model
+        model = instance_variable_get :@batch_model
       else
         raise ArgumentError, "model must be specified"
       end

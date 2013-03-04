@@ -3,9 +3,9 @@ require "batch_actions/class_methods"
 
 module BatchActions
   def batch_actions
-    return [] unless self.class.class_variable_defined? :@@batch_actions
+    return [] unless self.class.instance_variable_defined? :@batch_actions
 
-    actions = self.class.class_variable_get :@@batch_actions
+    actions = self.class.instance_variable_get :@batch_actions
     allowed = []
 
     actions.each do |keyword, condition|
