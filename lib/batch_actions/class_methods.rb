@@ -36,7 +36,13 @@ module BatchActions
       if opts.include? :if
         condition = opts[:if]
       else
-        condition = ->() { true }
+        condition = ->() do
+          if self.respond_to? :can?
+            can? keyword, model
+          else
+            true
+          end
+        end
       end
 
       @batch_actions[keyword] = condition
