@@ -116,12 +116,17 @@ describe BatchActions do
 
   it "supports InheritedResources" do
     expect do
-      mock_controller do
+      ctrl = mock_controller do
         def self.resource_class
           TestModel
         end
+        def end_of_association_chain
+          resource_class
+        end
+
         batch_action :test1
       end
+      ctrl.batch_test1
     end.not_to raise_error(ArgumentError)
   end
 
@@ -155,4 +160,5 @@ describe BatchActions do
       ctrl.batch_action
     end
   end
+
 end

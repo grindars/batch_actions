@@ -11,10 +11,8 @@ module BatchActions
         model = opts[:model]
       elsif !@batch_model.nil?
         model = @batch_model
-      elsif respond_to?(:resource_class)
-        model = resource_class
-      else
-        raise ArgumentError, "model must be specified"
+      elsif not(respond_to?(:resource_class))
+        raise ArgumentError, 'model must be specified'
       end
 
       if block_given?

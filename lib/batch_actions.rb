@@ -21,7 +21,8 @@ module BatchActions
     batch_action_button = (batch_actions & params.keys.map(&:to_sym)).first
     action = params[:name] || batch_action_button
 
-    batch_actions.include?(action.try(:to_sym)) or raise "action is not allowed"
+    (not(action.nil?) && batch_actions.include?(action.to_sym)) or
+      raise "batch action #{action} is not defined"
 
     send(:"batch_#{action}")
   end
