@@ -27,10 +27,5 @@ module BatchActions
 
   def self.included(base)
     base.extend ClassMethods
-
-    if defined?(InheritedResources::Base) &&
-       base < InheritedResources::Base
-      base.batch_model base.resource_class
-    end
   end
 end

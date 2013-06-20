@@ -27,17 +27,6 @@ describe BatchActions do
     end.to raise_error(ArgumentError)
   end
 
-  it "sets a model from inherited_resources" do
-    expect do
-      mock_controller do
-        def self.resource_class
-          TestModel
-        end
-        batch_action :test1
-      end
-    end.not_to raise_error(ArgumentError)
-  end
-
   it "allows per-action override of a model" do
     ctrl = mock_controller(
       :ids => [ 1 ]
@@ -127,10 +116,13 @@ describe BatchActions do
 
   it "supports InheritedResources" do
     expect do
-      mock_controller(:parent => InheritedResources::Base) do
+      mock_controller do
+        def self.resource_class
+          TestModel
+        end
         batch_action :test1
       end
-    end.to_not raise_error
+    end.not_to raise_error(ArgumentError)
   end
 
   it "supports CanCan" do
