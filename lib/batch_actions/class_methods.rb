@@ -31,7 +31,12 @@ module BatchActions
         scope = opts[:scope]
       else
         scope = ->(model) do
-          model.where(:id => params[:ids])
+          tail = if respond_to?(:end_of_association_chain)
+            end_of_association_chain
+          else
+            model
+          end
+          tail.where(:id => params[:ids])
         end
       end
 

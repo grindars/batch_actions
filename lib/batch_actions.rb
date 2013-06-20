@@ -18,7 +18,8 @@ module BatchActions
   end
 
   def batch_action
-    action = params[:name] || (batch_actions & params.keys.map(&:to_sym)).first
+    batch_action_button = (batch_actions & params.keys.map(&:to_sym)).first
+    action = params[:name] || batch_action_button
 
     batch_actions.include?(action.try(:to_sym)) or raise "action is not allowed"
 
