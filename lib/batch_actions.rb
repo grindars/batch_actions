@@ -18,9 +18,9 @@ module BatchActions
   end
 
   def batch_action
-    action = params[:name]
+    action = params[:name] || (batch_actions & params.keys.map(&:to_sym)).first
 
-    raise "action is not allowed" unless batch_actions.include? action.to_sym
+    batch_actions.include?(action.try(:to_sym)) or raise "action is not allowed"
 
     send(:"batch_#{action}")
   end
