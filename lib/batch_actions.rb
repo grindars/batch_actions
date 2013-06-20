@@ -9,7 +9,7 @@ module BatchActions
     allowed = []
 
     actions.each do |keyword, condition|
-      if instance_exec(&condition)
+      if condition.nil? || instance_exec(&condition)
         allowed << keyword
       end
     end

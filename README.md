@@ -45,7 +45,16 @@ class PostController < ApplicationController
 end
 ```
 
-Note that you can omit `batch_model` call if you use the [inherited_resources](https://github.com/josevalim/inherited_resources) gem. It grabs your model class from `resource_class`.
+## CanCan
+
+Because of every batch_action creates action called `batch_#{name}`, you can
+control access rights with CanCan.
+
+## InheritedResources
+
+Note that you can omit `batch_model` call if you use the [inherited_resources](https://github.com/josevalim/inherited_resources) gem. It grabs scope from `end_of_association_chain`.
+
+## Notes
 
 There's one more important thing to know: set of active batch actions can be retrieved from controller by calling `batch_actions` on controller instance.
 

@@ -38,14 +38,15 @@ module BatchActions
         end
       end
 
-      condition = opts[:if]
+      condition = opts[:if] if opts[:if]
 
       @batch_actions[keyword] = condition
 
       define_method(:"batch_#{keyword}") do
-        result = instance_exec(&condition)
-
-        raise "action is not allowed" unless result
+        if condition
+          result = instance_exec(&condition)
+          raise "action is not allowed" unless result
+        end
 
         objects = instance_exec(model, &scope)
         apply.call(objects)
