@@ -1,7 +1,7 @@
 module BatchActions
   module ClassMethods
-    def batch_model(klass)
-      @batch_model = klass
+    def batch_actions_defaults(defaults = {})
+      @batch_actions_defaults = defaults
     end
 
     def batch_action(keyword, opts = {}, &block)
