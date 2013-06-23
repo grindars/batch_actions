@@ -39,11 +39,11 @@ describe BatchActions do
         resource_class
       end
 
-      batch_actions do
-        batch_action :test1
-      end
+      batch_action :test1
+      batch_action :test2
     end
     -> { ctrl.batch_test1 }.should_not raise_error(ArgumentError)
+    -> { ctrl.batch_test2 }.should_not raise_error(ArgumentError)
   end
 
   it 'allows per-action override of params' do
