@@ -78,11 +78,12 @@ module BatchActions
 
     def default_scope
       ->(model, ids) do
-        tail = if respond_to?(:end_of_association_chain) && model.nil?
+        tail = if respond_to?(:resource_class) && model.nil?
           end_of_association_chain
         else
-          model or raise ArgumentError, 'You must specify batch_actions#model to apply batch action on'
+          model
         end
+        tail or raise ArgumentError, 'You must specify batch_actions#model to apply batch action on'
         tail.where(id: ids)
       end
     end

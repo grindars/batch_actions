@@ -35,8 +35,8 @@ describe BatchActions do
         TestModel
       end
 
-      def end_of_association_chain
-        resource_class
+      def resource_class
+        self.class.resource_class
       end
 
       batch_action :test1
