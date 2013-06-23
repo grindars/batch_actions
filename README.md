@@ -67,6 +67,7 @@ Batch action options and batch actions could be inherited.
 
 ```
 class Admin::BaseController < ApplicationController
+  include BatchActions
   batch_actions do
     param_name :ids_eq
   end
@@ -96,6 +97,7 @@ Note that you can omit `model` call if you use the [inherited_resources](https:/
 1. call before and after filters for producted actions if they are called from
    dispatcher.
 1. implement flash messages with inherited_resources responders for example.
+2. autoinclude it to actioncontroller inside railtie.
 
 ## Contributing
 
