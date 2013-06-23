@@ -1,25 +1,17 @@
 require 'simplecov'
-SimpleCov.start
 
+SimpleCov.start
 require 'batch_actions'
 
 class TestModel
   def self.where(query)
-    query[:id].map { self.new }
+    query[query.keys.first].map { self.new }
   end
 end
 
 class TestModel2
-  def self.where(query)
-    query[:id].map { self.new }
-  end
-end
-
-module InheritedResources
-  class Base
-    def self.resource_class
-      TestModel
-    end
+  def self.somewhere(query)
+    query[query.keys.first].map { self.new }
   end
 end
 
@@ -32,10 +24,18 @@ def mock_controller(params = {}, &block)
     def params
       self.class.instance_variable_get :@params
     end
+
+    def respond_with(object)
+      "Default response"
+    end
   end
 
   mock_class.class_exec(&block)
   mock_class.instance_variable_set :@params, params
 
   mock_class.new
+end
+
+RSpec.configure do |config|
+  config.mock_with :rr
 end

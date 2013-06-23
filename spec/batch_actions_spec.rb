@@ -1,149 +1,100 @@
 require 'spec_helper'
 
 describe BatchActions do
-  it "generates batch actions" do
-    ctrl = mock_controller(
-      :ids => [ 1, 2 ]
-    ) do
-      batch_model TestModel
-      batch_action :test1
-    end
+  it 'generates batch actions' do
+    params = {:ids => [ 1, 2 ]}
 
-    times = 0
-
-    TestModel.should_receive(:where).with({ :id => [ 1, 2 ]}).and_call_original
-    TestModel.any_instance.stub(:test1) { times += 1 }
-
-    ctrl.batch_test1
-
-    times.should == 2
-  end
-
-  it "requires a model to be specified" do
-    expect do
-      mock_controller do
+    ctrl = mock_controller(params) do
+      batch_actions do
+        model TestModel
         batch_action :test1
       end
-    end.to raise_error(ArgumentError)
-  end
-
-  it "allows per-action override of a model" do
-    ctrl = mock_controller(
-      :ids => [ 1 ]
-    ) do
-      batch_model TestModel
-
-      batch_action :test1
-      batch_action :test2, :model => TestModel2
     end
 
-    TestModel.should_receive(:where).with({ :id => [ 1 ]}).and_call_original
-    TestModel2.should_receive(:where).with({ :id => [ 1 ]}).and_call_original
-
-    TestModel.any_instance.should_receive(:test1).and_return(nil)
-    TestModel2.any_instance.should_receive(:test2).and_return(nil)
-
-    ctrl.batch_test1
-    ctrl.batch_test2
-  end
-
-  it "allows to specify scope" do
-    scope_called = false
-
-    instance = TestModel.new
-    instance.should_receive(:test1).and_return(nil)
-
-    ctrl = mock_controller(
-      :ids => [ 1 ]
-    ) do
-      batch_model TestModel
-
-      batch_action :test1, :scope => ->(model) do
-        scope_called = true
-
-        [ instance ]
-      end
+    mock.proxy(TestModel).where(id: params[:ids]).once
+    any_instance_of(TestModel) do |klass|
+      mock(klass).test1.times(params[:ids].length)
     end
 
-    ctrl.batch_test1
-
-    scope_called.should be_true
+    ctrl.batch_test1.should == 'Default response'
   end
 
-  it "allows to override default apply" do
-    block_called = nil
-
-    ctrl = mock_controller(
-      :ids => [ 1 ]
-    ) do
-      batch_model TestModel
-
-      batch_action(:test1) do |objects|
-        block_called = objects
-      end
-    end
-
-    ctrl.batch_test1
-
-    block_called.should_not be_nil
-    block_called.length.should == 1
-  end
-
-  it "supports :if" do
-    ctrl = mock_controller(
-      :ids => [ 1 ]
-    ) do
-      batch_model TestModel
-
-      batch_action :test, :if => ->() { false }
-    end
-
-    expect { ctrl.batch_test1 }.to raise_error
-    ctrl.batch_actions.should be_empty
-  end
-
-  it "implements batch_actions" do
+  it 'requires a model to be specified' do
     ctrl = mock_controller do
-      batch_model TestModel
-
-      batch_action :test1
-      batch_action :test2
-      batch_action :test3, :if => ->() { false }
-    end
-
-    ctrl.batch_actions.should == [ :test1, :test2 ]
-  end
-
-  it "supports InheritedResources" do
-    expect do
-      ctrl = mock_controller do
-        def self.resource_class
-          TestModel
-        end
-        def end_of_association_chain
-          resource_class
-        end
-
+      batch_actions do
         batch_action :test1
       end
-      ctrl.batch_test1
-    end.not_to raise_error(ArgumentError)
+    end
+
+    -> { ctrl.batch_test1 }.should raise_error(ArgumentError)
   end
 
-  it "implements batch_action" do
-    [ "test1", "test2" ].each do |action|
-      ctrl = mock_controller(
-        :ids => [ 1 ],
-        :name => action
-      ) do
-        batch_model TestModel
+  it 'does not require to specify model for inherited_resources' do
+    ctrl = mock_controller do
+      def self.resource_class
+        TestModel
+      end
+      def end_of_association_chain
+        resource_class
+      end
+
+      batch_actions do
+        batch_action :test1
+      end
+    end
+    -> { ctrl.batch_test1 }.should_not raise_error(ArgumentError)
+  end
+
+  it 'allows per-action override of params' do
+    ctrl = mock_controller(
+      :ids_eq => [1, 2],
+      :the_ids => [1, 2]
+    ) do
+      batch_actions do
+        model TestModel
+
+        param_name :the_ids
+        scope { |model, ids| model.where(other_id: ids) }
+        respond_to { 'Correct response' }
+
+        batch_action :test1
+        batch_action :test2,
+          param_name: :ids_eq,
+          model: TestModel2,
+          action_name: 'test_action',
+          batch_method: 'test_method',
+          scope: ->(model, ids) { model.somewhere(id: ids) },
+          respond_to: -> { 'Test response overriden' }
+      end
+    end
+
+    mock.proxy(TestModel).where(other_id: [1, 2]).once
+    any_instance_of(TestModel) do |klass|
+      mock(klass).test1.twice
+    end
+
+    mock.proxy(TestModel2).somewhere(id: [1, 2]).once
+    any_instance_of(TestModel2) do |klass|
+      mock(klass).test_method.twice
+    end
+
+    ctrl.batch_test1.should == 'Correct response'
+    ctrl.test_action.should == 'Test response overriden'
+  end
+
+  it 'implements #batch_actions' do
+    ctrl = mock_controller do
+      batch_actions do
         batch_action :test1
         batch_action :test2
+        batch_action :test3
       end
-
-      TestModel.any_instance.should_receive(action.to_sym).and_return(nil)
-      ctrl.batch_action
     end
-  end
 
+    ctrl.batch_actions.should == {
+      batch_test1: :test1,
+      batch_test2: :test2,
+      batch_test3: :test3
+    }
+  end
 end

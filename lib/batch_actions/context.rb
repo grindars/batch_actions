@@ -1,10 +1,14 @@
 module BatchActions
-  module Context
+  class Context
+    attr_reader :batch_actions
+
     def initialize
       @model      = nil
       @scope      = default_scope
       @respond_to = default_response
       @param_name = :ids
+
+      @batch_actions = {}
     end
 
     def configure(controller, &block)
@@ -12,12 +16,13 @@ module BatchActions
       instance_exec(&block)
     end
 
-    def model(model)
-      @model = model
-    end
-
+    private
     def param_name(name)
       @param_name = name
+    end
+
+    def model(resource_class)
+      @model = resource_class
     end
 
     def scope(&block)
@@ -36,36 +41,47 @@ module BatchActions
       param_name   = options[:param_name]   || @param_name
       action_name  = options[:action_name]  || :"batch_#{name}"
       batch_method = options[:batch_method] || options[:action_name] || name
+      trigger      = options[:trigger]      || name
+      model        = options[:model]        || @model
 
-      do_batch_stuff = block || ->() do
-        objects.map do |object|
-          object.send(batch_method)
+      do_batch_stuff = block || ->(objects) do
+        results = objects.map do |object|
+          [object, object.send(batch_method)]
         end
+        Hash[results]
       end
 
       @controller.class_eval do
         define_method action_name do
           @ids     = params[param_name]
-          @objects = instance_exec(model, ids, &scope)
-          @results = &do_batch_stuff.call(@objects)
+          @objects = instance_exec(model, @ids, &scope)
+          @results = do_batch_stuff.call(@objects)
 
           instance_exec(&response)
         end
       end
+
+      @batch_actions[action_name] = trigger
     end
 
-    def dispatch_action(name)
-
+    def dispatch_action(name = 'batch_action')
+      @controller.class_eval do
+        define_method name do
+          batch_actions.detect do |action, trigger|
+            if params.key?(trigger)
+              send(action)
+            end
+          end
+        end
+      end
     end
 
-    private
     def default_scope
       ->(model, ids) do
-        tail = if respond_to?(:end_of_association_chain)
+        tail = if respond_to?(:end_of_association_chain) && model.blank?
           end_of_association_chain
         else
-          model or raise 'You must specify batch_actions#model to apply batch action on'
-          model
+          model or raise ArgumentError, 'You must specify batch_actions#model to apply batch action on'
         end
         tail.where(id: ids)
       end
