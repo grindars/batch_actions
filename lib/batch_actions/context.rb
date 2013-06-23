@@ -90,7 +90,7 @@ module BatchActions
 
     def default_response
       ->() do
-        respond_with(@objects)
+        respond_with(@objects, location: url_for(action: :index))
       end
     end
   end
