@@ -78,7 +78,7 @@ module BatchActions
 
     def default_scope
       ->(model, ids) do
-        tail = if respond_to?(:end_of_association_chain) && model.blank?
+        tail = if respond_to?(:end_of_association_chain) && model.nil?
           end_of_association_chain
         else
           model or raise ArgumentError, 'You must specify batch_actions#model to apply batch action on'

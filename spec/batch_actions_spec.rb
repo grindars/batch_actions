@@ -34,6 +34,7 @@ describe BatchActions do
       def self.resource_class
         TestModel
       end
+
       def end_of_association_chain
         resource_class
       end
@@ -96,5 +97,22 @@ describe BatchActions do
       batch_test2: :test2,
       batch_test3: :test3
     }
+  end
+
+  it 'implements dispatch action' do
+    ctrl = mock_controller(:test1 => true, ids: [1, 2]) do
+      batch_actions do
+        model TestModel
+        dispatch_action
+        batch_action :test1
+      end
+    end
+
+    any_instance_of(TestModel) do |klass|
+      mock(klass).test1.any_times
+    end
+    proxy(ctrl).batch_test1.once
+
+    ctrl.batch_action
   end
 end
