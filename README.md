@@ -30,19 +30,19 @@ class PostController < ApplicationController
   batch_actions do
     model Post
 
-    # Produces `#batch_publish` action. Requires `params[:ids]` to get affected
-    # instances and call `#publish` on them.
+    # Produces #batch_publish action. Requires params[:ids] to get affected
+    # instances and call #publish on them.
     batch_action :publish
 
     # params[:batch_destroy] should be an array containing affected ids
     batch_action :destroy, param_name: :batch_destroy
 
-    # Produced controller action will be called `#mass_unpublish` (instead of
-    # `batch_unpublish by default). Method `#draft!` will be called for each
+    # Produced controller action will be called #mass_unpublish (instead of
+    # batch_unpublish by default). Method `#draft!` will be called for each
     # affected instance.
     batch_action :unpublish, action_name: :mass_unpublish, batch_method: :draft!
 
-    # Affected objects will be got inside `#destroyed` scope, redirection will
+    # Affected objects will be got inside #destroyed scope, redirection will
     # be done to params[:return_to] instead of action: :index
     batch_action :restore,
       scope: ->(model, ids) { Post.destroyed.where(id: ids) },
@@ -52,10 +52,10 @@ class PostController < ApplicationController
         end
       }
 
-    # Produces action `#do_batch` with dispatches batch action to concrete
-    # actions if you pass param named as batch action name ('destroy=true'
-    # for `batch_action :destroy`). You can change param name which triggers
-    # batch action with `:trigger` param of batch action.
+    # Produces action #do_batch with dispatches batch action to concrete
+    # actions if you pass param named as batch action name ("destroy=true"
+    # for batch_action :destroy). You can change param name which triggers
+    # batch action with :trigger param of batch action.
     dispatch_action(:do_batch)
   end
 end
@@ -74,7 +74,7 @@ class Admin::BaseController < ApplicationController
 end
 
 class Admin::NewsController < Admin::BaseController
-  # You can omit `#batch_actions` call if you do not want to set options.
+  # You can omit #batch_actions call if you do not want to set options.
   batch_action :destroy
   batch_action :publish
 end
@@ -98,6 +98,7 @@ Note that you can omit `model` call if you use the [inherited_resources](https:/
    dispatcher.
 1. implement flash messages with inherited_resources responders for example.
 2. autoinclude it to actioncontroller inside railtie.
+3. :tirgger param must be a proc.
 
 ## Contributing
 
