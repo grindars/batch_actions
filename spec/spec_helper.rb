@@ -25,8 +25,12 @@ def mock_controller(params = {}, &block)
       self.class.instance_variable_get :@params
     end
 
-    def respond_with(object)
+    def respond_with(object, *args)
       "Default response"
+    end
+
+    def url_for(*args)
+      ""
     end
   end
 
