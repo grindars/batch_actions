@@ -1,6 +1,7 @@
 # BatchActions
 
-This gem adds generic support for batch actions to Rails controllers.
+This gem adds generic support for batch actions to Rails controllers and
+InheritedResources.
 
 [![Travis CI](https://secure.travis-ci.org/grindars/batch_actions.png)](https://travis-ci.org/grindars/batch_actions)
 [![Code Climate](https://codeclimate.com/github/grindars/batch_actions.png)](https://codeclimate.com/github/grindars/batch_actions)
@@ -38,12 +39,12 @@ class PostController < ApplicationController
     batch_action :destroy, param_name: :batch_destroy
 
     # Produced controller action will be called #mass_unpublish (instead of
-    # batch_unpublish by default). Method `#draft!` will be called for each
+    # batch_unpublish by default). Method #draft! will be called for each
     # affected instance.
     batch_action :unpublish, action_name: :mass_unpublish, batch_method: :draft!
 
     # Affected objects will be got inside #destroyed scope, redirection will
-    # be done to params[:return_to] instead of action: :index
+    # be done to params[:return_to] instead of url_for(action: :index)
     batch_action :restore,
       scope: ->(model, ids) { Post.destroyed.where(id: ids) },
       respose: -> {
@@ -52,10 +53,10 @@ class PostController < ApplicationController
         end
       }
 
-    # Produces action #do_batch with dispatches batch action to concrete
-    # actions if you pass param named as batch action name ("destroy=true"
-    # for batch_action :destroy). You can change param name which triggers
-    # batch action with :trigger param of batch action.
+    # Produces action #do_batch with dispatches request to concrete
+    # actions. Concrete action is determined by param named as action name
+    # ("destroy=true" for batch_action :destroy) or by :trigger option value
+    # ("call_destroy=true for batch_action :destroy, trigger: :call_destroy).
     dispatch_action(:do_batch)
   end
 end
