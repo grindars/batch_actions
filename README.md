@@ -56,7 +56,7 @@ class PostController < ApplicationController
     # Produces action #do_batch with dispatches request to concrete
     # actions. Concrete action is determined by param named as action name
     # ("destroy=true" for batch_action :destroy) or by :trigger option value
-    # ("call_destroy=true for batch_action :destroy, trigger: :call_destroy).
+    # ("call_destroy=true" for batch_action :destroy, trigger: :call_destroy).
     dispatch_action(:do_batch)
   end
 end
@@ -91,7 +91,7 @@ control access rights with CanCan. Action name could be overriden with
 
 ## InheritedResources
 
-Note that you can omit `model` call if you use the [inherited_resources](https://github.com/josevalim/inherited_resources) gem. It grabs scope from `end_of_association_chain`.
+Note that you can omit `model` call if you use the [inherited_resources](https://github.com/josevalim/inherited_resources) gem. It grabs scope from `resource_class` and scope from `end_of_association_chain`.
 
 ## TODO
 
