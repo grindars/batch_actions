@@ -7,9 +7,9 @@ module BatchActions
       @batch_actions
     end
 
-    def batch_action(action)
+    def batch_action(action, options = {})
       batch_actions do
-        batch_action action
+        batch_action action, options
       end
     end
 
