@@ -12,7 +12,7 @@ module BatchActions
     end
 
     def configure(controller, &block)
-      @controller = controller
+      @controller_class = controller
       instance_exec(&block)
     end
 
@@ -51,7 +51,7 @@ module BatchActions
         Hash[results]
       end
 
-      @controller.class_eval do
+      @controller_class.class_eval do
         define_method action_name do
           @ids     = params[param_name]
           @objects = instance_exec(model, @ids, &scope)
@@ -65,7 +65,7 @@ module BatchActions
     end
 
     def dispatch_action(name = 'batch_action')
-      @controller.class_eval do
+      @controller_class.class_eval do
         define_method name do
           batch_actions.detect do |action, trigger|
             if params.key?(trigger)
@@ -78,7 +78,7 @@ module BatchActions
 
     def default_scope
       ->(model, ids) do
-        tail = if respond_to?(:resource_class) && model.nil?
+        tail = if self.class.respond_to?(:resource_class) && model.nil?
           end_of_association_chain
         else
           model
