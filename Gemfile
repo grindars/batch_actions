@@ -6,4 +6,4 @@ gemspec
 gem 'rspec'
 gem 'rake'
 gem 'simplecov'
-
+gem 'rr'
