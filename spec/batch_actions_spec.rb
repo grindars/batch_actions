@@ -6,7 +6,9 @@ describe BatchActions do
       :ids => [ 1, 2 ]
     ) do
       batch_model TestModel
-      batch_action :test1
+      batch_action :test1 do |list|
+        list.each &:test1
+      end
     end
 
     times = 0
@@ -22,6 +24,18 @@ describe BatchActions do
   it "requires a model to be specified" do
     expect do
       mock_controller do
+        batch_action :test1 do |list|
+          list.each &:test1
+        end
+      end
+    end.to raise_error(ArgumentError)
+  end
+
+  it "requires a block to be specified" do
+    expect do
+      mock_controller do
+        batch_model TestModel
+
         batch_action :test1
       end
     end.to raise_error(ArgumentError)
@@ -33,8 +47,12 @@ describe BatchActions do
     ) do
       batch_model TestModel
 
-      batch_action :test1
-      batch_action :test2, :model => TestModel2
+      batch_action :test1 do |list|
+        list.each &:test1
+      end
+      batch_action :test2, :model => TestModel2 do |list|
+        list.each &:test2
+      end
     end
 
     TestModel.should_receive(:where).with({ :id => [ 1 ]}).and_call_original
@@ -58,10 +76,12 @@ describe BatchActions do
     ) do
       batch_model TestModel
 
-      batch_action :test1, :scope => ->(model) do
+      batch_action(:test1, :scope => ->(model) do
         scope_called = true
 
         [ instance ]
+      end) do |list|
+        list.each &:test1
       end
     end
 
@@ -70,32 +90,15 @@ describe BatchActions do
     scope_called.should be_true
   end
 
-  it "allows to override default apply" do
-    block_called = nil
-
-    ctrl = mock_controller(
-      :ids => [ 1 ]
-    ) do
-      batch_model TestModel
-
-      batch_action(:test1) do |objects|
-        block_called = objects
-      end
-    end
-
-    ctrl.batch_test1
-
-    block_called.should_not be_nil
-    block_called.length.should == 1
-  end
-
   it "supports :if" do
     ctrl = mock_controller(
       :ids => [ 1 ]
     ) do
       batch_model TestModel
 
-      batch_action :test, :if => ->() { false }
+      batch_action(:test, :if => ->() { false }) do |list|
+        list.each &:test
+      end
     end
 
     expect { ctrl.batch_test1 }.to raise_error
@@ -106,9 +109,15 @@ describe BatchActions do
     ctrl = mock_controller do
       batch_model TestModel
 
-      batch_action :test1
-      batch_action :test2
-      batch_action :test3, :if => ->() { false }
+      batch_action :test1 do |list|
+        list.each &:test1
+      end
+      batch_action :test2 do |list|
+        list.each &:test2
+      end
+      batch_action(:test3, :if => ->() { false }) do |list|
+        list.each &:test3
+      end
     end
 
     ctrl.batch_actions.should == [ :test1, :test2 ]
@@ -117,7 +126,9 @@ describe BatchActions do
   it "supports InheritedResources" do
     expect do
       mock_controller(:parent => InheritedResources::Base) do
-        batch_action :test1
+        batch_action(:test1) do |list|
+          list.each &:test1
+        end
       end
     end.to_not raise_error
   end
@@ -129,12 +140,27 @@ describe BatchActions do
         :batch_action => action
       ) do
         batch_model TestModel
-        batch_action :test1
-        batch_action :test2
+        batch_action :test1 do |list|
+          list.each &:test1
+        end
+        batch_action :test2 do |list|
+          list.each &:test2
+        end
       end
 
       TestModel.any_instance.should_receive(action.to_sym).and_return(nil)
       ctrl.dispatch_batch
     end
+  end
+
+  it "throws on disallowed action in dispatch_batch" do
+    ctrl = mock_controller(
+      :batch_action => :test
+    ) do
+    end
+
+    expect do
+      ctrl.dispatch_batch
+    end.to raise_error(ActionController::RoutingError)
   end
 end

@@ -18,11 +18,7 @@ module BatchActions
       if block_given?
         apply = block
       else
-        apply = ->(objects) do
-          objects.each do |object|
-            object.send(keyword)
-          end
-        end
+        raise ArgumentError, "block must be specified"
       end
 
       if opts.include? :scope
