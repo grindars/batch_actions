@@ -17,12 +17,16 @@ module BatchActions
     allowed
   end
 
-  def batch_action
-    action = params[:name]
+  def dispatch_batch
+    name = params[:batch_action]
 
-    raise "action is not allowed" unless batch_actions.include? action.to_sym
+    allowed = batch_actions.detect { |action| action.to_s == name.to_s }
+    unless allowed
+      raise ActionController::RoutingError.new('batch action is not allowed')
+    end
 
-    send(:"batch_#{action}")
+    self.status, headers, self.response_body = self.class.action(:"batch_#{name}").call(env)
+    self.headers.merge! headers
   end
 
   def self.included(base)

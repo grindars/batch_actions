@@ -122,26 +122,11 @@ describe BatchActions do
     end.to_not raise_error
   end
 
-  it "supports CanCan" do
-    ctrl = mock_controller do
-      batch_model TestModel
-
-      batch_action :test1
-      batch_action :test2
-
-      def can?(keyword, model)
-        keyword == :test1
-      end
-    end
-
-    ctrl.batch_actions.should == [ :test1 ]
-  end
-
-  it "implements batch_action" do
+  it "implements dispatch_batch" do
     [ "test1", "test2" ].each do |action|
       ctrl = mock_controller(
         :ids => [ 1 ],
-        :name => action
+        :batch_action => action
       ) do
         batch_model TestModel
         batch_action :test1
@@ -149,7 +134,7 @@ describe BatchActions do
       end
 
       TestModel.any_instance.should_receive(action.to_sym).and_return(nil)
-      ctrl.batch_action
+      ctrl.dispatch_batch
     end
   end
 end

@@ -2,6 +2,7 @@ require 'simplecov'
 SimpleCov.start
 
 require 'batch_actions'
+require 'action_controller'
 
 class TestModel
   def self.where(query)
@@ -24,7 +25,7 @@ module InheritedResources
 end
 
 def mock_controller(params = {}, &block)
-  parent = params.delete(:parent) || Object
+  parent = params.delete(:parent) || ActionController::Metal
 
   mock_class = Class.new(parent) do
     include BatchActions

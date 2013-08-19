@@ -36,13 +36,7 @@ module BatchActions
       if opts.include? :if
         condition = opts[:if]
       else
-        condition = ->() do
-          if self.respond_to? :can?
-            can? keyword, model
-          else
-            true
-          end
-        end
+        condition = ->() { true }
       end
 
       @batch_actions[keyword] = condition
@@ -50,10 +44,9 @@ module BatchActions
       define_method(:"batch_#{keyword}") do
         result = instance_exec(&condition)
 
-        raise "action is not allowed" unless result
+        raise ActionController::RoutingError.new('batch action is not allowed') unless result
 
-        objects = instance_exec(model, &scope)
-        apply.call(objects)
+        instance_exec(instance_exec(model, &scope), &apply)
       end
     end
   end
