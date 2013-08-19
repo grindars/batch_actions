@@ -69,14 +69,22 @@ describe BatchActions do
     scope_called = false
 
     instance = TestModel.new
-    instance.should_receive(:test1).and_return(nil)
+    instance.should_receive(:test1).exactly(2).times.and_return(nil)
 
     ctrl = mock_controller(
       :ids => [ 1 ]
     ) do
       batch_model TestModel
 
-      batch_action(:test1, :scope => ->(model) do
+      batch_action(:test1, :scope => ->(ids) do
+        scope_called = true
+
+        [ instance ]
+      end) do |list|
+        list.each &:test1
+      end
+
+      batch_action(:test2, :scope => ->(ids, scope) do
         scope_called = true
 
         [ instance ]
@@ -86,8 +94,13 @@ describe BatchActions do
     end
 
     ctrl.batch_test1
-
     scope_called.should be_true
+
+    scope_called = false
+    ctrl.batch_test2
+    scope_called.should be_true
+
+
   end
 
   it "supports :if" do

@@ -24,8 +24,8 @@ module BatchActions
       if opts.include? :scope
         scope = opts[:scope]
       else
-        scope = ->(model) do
-          model.where(:id => params[:ids])
+        scope = ->(ids) do
+          model.where(:id => ids)
         end
       end
 
@@ -37,12 +37,23 @@ module BatchActions
 
       @batch_actions[keyword] = condition
 
+      raise ArgumentError, "unexpected number of arguments for scope" if scope.arity < 1 || scope.arity > 2
+
       define_method(:"batch_#{keyword}") do
         result = instance_exec(&condition)
 
         raise ActionController::RoutingError.new('batch action is not allowed') unless result
 
-        instance_exec(instance_exec(model, &scope), &apply)
+        case scope.arity
+        when 1
+          objects = instance_exec(params[:ids], &scope)
+
+        when 2
+          objects = instance_exec(params[:ids], model.where(:id => params[:ids]), &scope)
+          
+        end
+
+        instance_exec(objects, &apply)
       end
     end
   end
